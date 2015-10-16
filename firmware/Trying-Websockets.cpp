@@ -536,6 +536,7 @@ bool WebSocketClient::readHandshake() {
 		attempts++;
 	}
 
+	int checks = 3;
 	while(true) {
 		readLine(line);
 		#ifdef HANDSHAKE
@@ -546,9 +547,18 @@ bool WebSocketClient::readHandshake() {
 		if(strcmp(line, "") == 0) {
 		  break;
 		}
-		if(strncmp(line, "kuZ2KVbyl4oJOyuTXN/B93O3z9Y=", 12) == 0) {
-		  result = true;
+		if(strncmp(line, "Sec-WebSocket-Accept: kuZ2KVbyl4oJOyuTXN/B93O3z9Y=", 51) == 0) {
+		    checks--;
 		}
+		if(strncmp(line, "Connection: Upgrade", 20) == 0) {
+		    checks--;
+		}
+		if(strncmp(line, "Upgrade: websocket", 19) == 0) {
+		    checks--;
+		}
+	}
+	if (checks == 0) {
+		result = true;
 	}
 
 	if(!result) {
